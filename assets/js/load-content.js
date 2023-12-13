@@ -28,6 +28,9 @@ fetchSheet
       content[key].push(row);
     });
 
+    // document title
+    document.title = content.document[0].title;
+
     // logo
     let logos = content.logo[0];
     $(".header_navbar img").attr("src", logos.logo1);
@@ -76,6 +79,11 @@ fetchSheet
           >
         </li>
       `;
+
+      // update section title
+      if (row.navDescription) {
+        try { document.querySelector(`${row.navLink} h4`).innerHTML = row.navDescription; } catch (error) {}
+      }
     });
     document.querySelector("#nav").innerHTML = navHtml;
     document.querySelector("#nav-2").innerHTML = nav2Html;
@@ -96,7 +104,7 @@ fetchSheet
 
     // header
     let header = content.header[0];
-    document.querySelector("#home > div.container > div > div > div > h2").innerHTML = header.title ;
+    document.querySelector("#header-title").outerHTML = header.title;
     document.querySelector("#home > div.container > div > div > div > div").innerHTML = header.description.replaceAll(/^(.+)$/gm, "<p>$1</p>");
     let headerImageUrl = header.resourceUrl  || "assets/images/header_app.png";
     document.querySelector("#header-app").innerHTML = `
@@ -123,7 +131,7 @@ fetchSheet
           data-wow-delay="0.2s"
           style="border-top: 3px solid var(--color-1)">
           <div class="pricing_top_bar">
-            <h4 class="title" style="color: var(--color-1)">Ngày</h4>
+            <h4 class="title" style="color: var(--color-1)">${row.eventLeading}</h4>
             <span class="price" style="color: var(--color-1)">${row.eventDate }</span>
           </div>
           <div class="pricing_list px-4 text-left">
@@ -148,7 +156,33 @@ fetchSheet
     document.querySelector("#timeline").innerHTML = timelineHtml;
 
     // video
-    document.querySelector("#video iframe").src = content.video[0].resourceUrl ;
+    let videoHtml = "";
+    content.video.forEach(row => {
+      videoHtml += `
+        <div class="video-item-container" title="${row.title}">
+          <iframe
+            src="${row.resourceUrl}"
+            title="${row.title}"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+        </div>
+      `;
+    });
+    document.querySelector("#video div:nth-child(2)").innerHTML = videoHtml;
+
+    $("#video div:nth-child(2)").slick({
+      dots: false,
+      infinite: true,
+      speed: 300,
+      slidesToShow: 1,
+      slidesToScroll: 1,
+      arrows: true,
+      pauseOnHover: false,
+      prevArrow: '<span class="prev"><i class="lni lni-arrow-left"></i></span>',
+      nextArrow: '<span class="next"><i class="lni lni-arrow-right"></i></span>',
+    });
 
     // gallery
     let galleryHtml = "";
@@ -177,7 +211,8 @@ fetchSheet
     });
 
     // map
-    document.querySelector("#download div p img").src = content.map[0].resourceUrl ;
+    document.querySelector("#download iframe").src = content.map[0].resourceUrl ;
+    document.querySelector("#video iframe").src = content.video[0].resourceUrl ;
 
     // testimonial
     let testimonialHtml = "";
@@ -215,6 +250,7 @@ fetchSheet
             <h4 class="blog_title">
               <a target="_blank" href="${row.postLink }">${row.postTitle }</a>
             </h4>
+            <p>${row.postDescription}</p>
             <a target="_blank" href="${row.postLink }" class="main-btn">Xem Thêm</a>
           </div>
         </div>
@@ -228,18 +264,17 @@ fetchSheet
       slidesToShow: 3,
       slidesToScroll: 1,
       arrows: true,
-      // dots: true,
       speed: 300,
       infinite: true,
       autoplaySpeed: 2000,
-      prevArrow: '<span class="prev"></span>',
+      prevArrow: '<span class="prev"><i class="lni lni-arrow-left"></i></span>',
       nextArrow: '<span class="next"><i class="lni lni-arrow-right"></i></span>',
       autoplay: true,
       responsive: [
         {
           breakpoint: 991,
           settings: {
-            slidesToShow: 3,
+            slidesToShow: 2,
           },
         },
         {
